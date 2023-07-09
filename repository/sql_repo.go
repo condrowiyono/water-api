@@ -5,12 +5,13 @@ import (
 	"mini-bank/helpers"
 	"mini-bank/infra/database"
 	"mini-bank/infra/logger"
+	"mini-bank/utils"
 
 	"gorm.io/gorm"
 )
 
 func Create(model interface{}) error {
-	helpers.AddUUIDToModel(model)
+	utils.AddUUIDToModel(model)
 
 	err := database.DB.Create(model).Error
 	if err != nil {
@@ -31,7 +32,7 @@ func GetWithPreload(model interface{}, preload string) error {
 	return err
 }
 
-func GetWithFilter(model interface{}, filter interface{}, pagination helpers.Pagination) (int64, error) {
+func GetWithFilter(model interface{}, filter interface{}, pagination utils.Pagination) (int64, error) {
 	var count int64
 
 	query := database.DB
@@ -45,7 +46,7 @@ func GetWithFilter(model interface{}, filter interface{}, pagination helpers.Pag
 	return count, query.Scopes(helpers.WithPagination(pagination)).Order("created_at DESC").Find(model).Error
 }
 
-func GetWithFilterWithPreload(model interface{}, filter interface{}, pagination helpers.Pagination, preload string) error {
+func GetWithFilterWithPreload(model interface{}, filter interface{}, pagination utils.Pagination, preload string) error {
 	err := database.DB.Scopes(helpers.WithPagination(pagination)).Preload(preload)
 
 	if filter != nil {

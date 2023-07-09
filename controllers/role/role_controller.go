@@ -2,25 +2,28 @@ package role
 
 import (
 	"fmt"
-	"mini-bank/helpers"
 	"mini-bank/models"
 	"mini-bank/repository"
+	"mini-bank/utils"
 
 	"github.com/gin-gonic/gin"
 )
 
+type Filter struct {
+	Name string `form:"name"`
+}
+
 func GetAll(ctx *gin.Context) {
 	var role []*models.Role
-	var filter models.Role
+	var filter Filter
+	ctx.BindQuery(&filter)
 
-	name := ctx.Query("name")
-	filter = models.Role{Name: name}
-	pagination := helpers.GetPagination(ctx)
+	pagination := utils.GetPagination(ctx)
 	preload := "Permissions"
 
 	repository.GetWithFilterWithPreload(&role, &filter, pagination, preload)
 
-	helpers.ResponseSuccess(ctx, role)
+	utils.ResponseSuccess(ctx, role)
 }
 
 func Create(ctx *gin.Context) {
@@ -28,17 +31,17 @@ func Create(ctx *gin.Context) {
 
 	err := ctx.BindJSON(&role)
 	if err != nil {
-		helpers.ResponseBadRequest(ctx, err)
+		utils.ResponseBadRequest(ctx, err)
 		return
 	}
 
 	err = repository.Create(&role)
 	if err != nil {
-		helpers.ResponseBadRequest(ctx, err)
+		utils.ResponseBadRequest(ctx, err)
 		return
 	}
 
-	helpers.ResponseCreated(ctx, role)
+	utils.ResponseCreated(ctx, role)
 }
 
 func GetByID(ctx *gin.Context) {
@@ -49,11 +52,11 @@ func GetByID(ctx *gin.Context) {
 
 	fmt.Println("err", err)
 	if err != nil {
-		helpers.ResponseNotFound(ctx, err)
+		utils.ResponseNotFound(ctx, err)
 		return
 	}
 
-	helpers.ResponseSuccess(ctx, role)
+	utils.ResponseSuccess(ctx, role)
 }
 
 func Update(ctx *gin.Context) {
@@ -62,23 +65,23 @@ func Update(ctx *gin.Context) {
 	err := repository.GetByID(&role, id)
 
 	if err != nil {
-		helpers.ResponseNotFound(ctx, err)
+		utils.ResponseNotFound(ctx, err)
 		return
 	}
 
 	err = ctx.BindJSON(&role)
 	if err != nil {
-		helpers.ResponseBadRequest(ctx, err)
+		utils.ResponseBadRequest(ctx, err)
 		return
 	}
 
 	err = repository.Update(&role)
 	if err != nil {
-		helpers.ResponseBadRequest(ctx, err)
+		utils.ResponseBadRequest(ctx, err)
 		return
 	}
 
-	helpers.ResponseSuccess(ctx, role)
+	utils.ResponseSuccess(ctx, role)
 }
 
 func Delete(ctx *gin.Context) {
@@ -87,17 +90,17 @@ func Delete(ctx *gin.Context) {
 	err := repository.GetByID(&role, id)
 
 	if err != nil {
-		helpers.ResponseNotFound(ctx, err)
+		utils.ResponseNotFound(ctx, err)
 		return
 	}
 
 	err = repository.Delete(&role)
 	if err != nil {
-		helpers.ResponseBadRequest(ctx, err)
+		utils.ResponseBadRequest(ctx, err)
 		return
 	}
 
-	helpers.ResponseSuccess(ctx, role)
+	utils.ResponseSuccess(ctx, role)
 }
 
 func AddPermissions(ctx *gin.Context) {
@@ -105,15 +108,15 @@ func AddPermissions(ctx *gin.Context) {
 	id := ctx.Param("id")
 	err := ctx.BindJSON(&permissions)
 	if err != nil {
-		helpers.ResponseBadRequest(ctx, err)
+		utils.ResponseBadRequest(ctx, err)
 		return
 	}
 
 	err = repository.AddPermissionsToRole(id, permissions.Permission)
 	if err != nil {
-		helpers.ResponseBadRequest(ctx, err)
+		utils.ResponseBadRequest(ctx, err)
 		return
 	}
 
-	helpers.ResponseSuccess(ctx, nil)
+	utils.ResponseSuccess(ctx, nil)
 }

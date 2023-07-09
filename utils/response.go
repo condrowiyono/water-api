@@ -1,4 +1,4 @@
-package helpers
+package utils
 
 import (
 	"net/http"
@@ -16,13 +16,14 @@ type Response struct {
 	Code    int         `json:"code"`
 	Message string      `json:"message"`
 	Data    interface{} `json:"data"`
-	Meta    Meta        `json:"meta,omitempty"`
+	Meta    *Meta       `json:"meta,omitempty"`
 }
 
 type ResponseError struct {
-	Code    int         `json:"code"`
-	Message string      `json:"message"`
-	Errors  interface{} `json:"errors"`
+	Code      int         `json:"code"`
+	ErrorCode int         `json:"error_code"`
+	Message   string      `json:"message"`
+	Errors    interface{} `json:"errors"`
 }
 
 func ResponseListSuccess(ctx *gin.Context, data interface{}, meta Meta) {
@@ -30,7 +31,7 @@ func ResponseListSuccess(ctx *gin.Context, data interface{}, meta Meta) {
 		Code:    http.StatusOK,
 		Message: "success",
 		Data:    data,
-		Meta:    meta,
+		Meta:    &meta,
 	})
 }
 
@@ -51,7 +52,7 @@ func ResponseCreated(ctx *gin.Context, data interface{}) {
 }
 
 func ResponseBadRequest(ctx *gin.Context, err error) {
-	ctx.JSON(http.StatusBadRequest, ResponseError{
+	ctx.AbortWithStatusJSON(http.StatusBadRequest, ResponseError{
 		Code:    http.StatusBadRequest,
 		Message: "failed",
 		Errors:  err.Error(),
@@ -59,7 +60,7 @@ func ResponseBadRequest(ctx *gin.Context, err error) {
 }
 
 func ResponseNotFound(ctx *gin.Context, err error) {
-	ctx.JSON(http.StatusNotFound, ResponseError{
+	ctx.AbortWithStatusJSON(http.StatusNotFound, ResponseError{
 		Code:    http.StatusNotFound,
 		Message: "failed",
 		Errors:  err.Error(),
@@ -67,25 +68,25 @@ func ResponseNotFound(ctx *gin.Context, err error) {
 }
 
 func ResponseInternalServerError(ctx *gin.Context, err error) {
-	ctx.JSON(http.StatusInternalServerError, ResponseError{
+	ctx.AbortWithStatusJSON(http.StatusInternalServerError, ResponseError{
 		Code:    http.StatusInternalServerError,
 		Message: "failed",
-		Errors:  err,
+		Errors:  err.Error(),
 	})
 }
 
 func ResponseUnauthorized(ctx *gin.Context, err error) {
-	ctx.JSON(http.StatusUnauthorized, ResponseError{
+	ctx.AbortWithStatusJSON(http.StatusUnauthorized, ResponseError{
 		Code:    http.StatusUnauthorized,
 		Message: "failed",
-		Errors:  err,
+		Errors:  err.Error(),
 	})
 }
 
 func ResponseForbidden(ctx *gin.Context, err error) {
-	ctx.JSON(http.StatusForbidden, ResponseError{
+	ctx.AbortWithStatusJSON(http.StatusForbidden, ResponseError{
 		Code:    http.StatusForbidden,
 		Message: "failed",
-		Errors:  err,
+		Errors:  err.Error(),
 	})
 }

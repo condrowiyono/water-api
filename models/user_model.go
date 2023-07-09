@@ -7,7 +7,7 @@ import (
 type User struct {
 	Id                   string     `gorm:"type:VARCHAR(36);primary_key;" json:"id"`
 	Email                string     `gorm:"unique" json:"email" binding:"required"`
-	Password             string     `json:"-" binding:"required"`
+	Password             string     `json:"password,omitempty" binding:"required"`
 	FacultyEmail         string     `gorm:"unique" json:"faculty_email" binding:"required"`
 	Name                 string     `json:"name" `
 	VerificationToken    string     `json:"verification_token,omitempty"`
@@ -18,7 +18,5 @@ type User struct {
 	CreatedAt            *time.Time `json:"created_at"`
 	UpdatedAt            *time.Time `json:"updated_at"`
 	DeletedAt            *time.Time `json:"deleted_at,omitempty"`
-
-	// user can have many roles
-	Roles []Role `gorm:"many2many:user_roles;" json:"roles,omitempty"`
+	Roles                []Role     `gorm:"many2many:user_roles;" json:"roles,omitempty"`
 }

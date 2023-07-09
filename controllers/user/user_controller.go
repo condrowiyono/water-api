@@ -2,31 +2,27 @@ package user
 
 import (
 	"fmt"
-	"mini-bank/helpers"
 	"mini-bank/models"
 	"mini-bank/repository"
+	"mini-bank/utils"
 
 	"github.com/gin-gonic/gin"
 )
 
 func GetAll(ctx *gin.Context) {
 	var user []*models.User
-	var filter models.User
+	var filter UserFilerDTO
+	ctx.BindQuery(&filter)
 
-	name := ctx.Query("name")
-	email := ctx.Query("email")
-	facultyEmail := ctx.Query("faculty_email")
-	filter = models.User{Name: name, Email: email, FacultyEmail: facultyEmail}
-	pagination := helpers.GetPagination(ctx)
-
-	total, err := repository.GetWithFilter(&user, &filter, pagination)
+	pagination := utils.Pagination{Page: filter.Page, Limit: filter.Limit}
+	total, err := repository.GetAllUser(&user, &filter, pagination)
 
 	if err != nil {
-		helpers.ResponseBadRequest(ctx, err)
+		utils.ResponseBadRequest(ctx, err)
 		return
 	}
 
-	helpers.ResponseListSuccess(ctx, user, helpers.Meta{Page: pagination.Page, Limit: pagination.Limit, Total: total})
+	utils.ResponseListSuccess(ctx, user, utils.Meta{Page: pagination.Page, Limit: pagination.Limit, Total: total})
 }
 
 func Create(ctx *gin.Context) {
@@ -34,34 +30,35 @@ func Create(ctx *gin.Context) {
 
 	err := ctx.BindJSON(&user)
 	if err != nil {
-		helpers.ResponseBadRequest(ctx, err)
+		utils.ResponseBadRequest(ctx, err)
 		return
 	}
 
-	user.Password = helpers.HashPassword(user.Password)
+	user.Password = utils.HashPassword(user.Password)
 
 	err = repository.Create(&user)
 	if err != nil {
-		helpers.ResponseBadRequest(ctx, err)
+		utils.ResponseBadRequest(ctx, err)
 		return
 	}
 
-	helpers.ResponseCreated(ctx, user)
+	utils.ResponseCreated(ctx, user)
 }
 
 func GetByID(ctx *gin.Context) {
 	var user models.User
 
 	id := ctx.Param("id")
-	err := repository.GetByID(&user, id)
+	preload := "Roles"
+	err := repository.GetByIDWithPreload(&user, id, preload)
 
 	fmt.Println("err", err)
 	if err != nil {
-		helpers.ResponseNotFound(ctx, err)
+		utils.ResponseNotFound(ctx, err)
 		return
 	}
-
-	helpers.ResponseSuccess(ctx, user)
+	user.Password = ""
+	utils.ResponseSuccess(ctx, user)
 }
 
 func Update(ctx *gin.Context) {
@@ -70,23 +67,23 @@ func Update(ctx *gin.Context) {
 	err := repository.GetByID(&user, id)
 
 	if err != nil {
-		helpers.ResponseNotFound(ctx, err)
+		utils.ResponseNotFound(ctx, err)
 		return
 	}
 
 	err = ctx.BindJSON(&user)
 	if err != nil {
-		helpers.ResponseBadRequest(ctx, err)
+		utils.ResponseBadRequest(ctx, err)
 		return
 	}
 
 	err = repository.Update(&user)
 	if err != nil {
-		helpers.ResponseBadRequest(ctx, err)
+		utils.ResponseBadRequest(ctx, err)
 		return
 	}
 
-	helpers.ResponseSuccess(ctx, user)
+	utils.ResponseSuccess(ctx, user)
 }
 
 func Delete(ctx *gin.Context) {
@@ -95,15 +92,33 @@ func Delete(ctx *gin.Context) {
 	err := repository.GetByID(&user, id)
 
 	if err != nil {
-		helpers.ResponseNotFound(ctx, err)
+		utils.ResponseNotFound(ctx, err)
 		return
 	}
 
 	err = repository.Delete(&user)
 	if err != nil {
-		helpers.ResponseBadRequest(ctx, err)
+		utils.ResponseBadRequest(ctx, err)
 		return
 	}
 
-	helpers.ResponseSuccess(ctx, user)
+	utils.ResponseSuccess(ctx, user)
+}
+
+func AttachRole(ctx *gin.Context) {
+	var roles AttachRoleToUser
+	id := ctx.Param("id")
+	err := ctx.BindJSON(&roles)
+	if err != nil {
+		utils.ResponseBadRequest(ctx, err)
+		return
+	}
+
+	err = repository.AttachRoleToUser(id, roles.Role)
+	if err != nil {
+		utils.ResponseBadRequest(ctx, err)
+		return
+	}
+
+	utils.ResponseSuccess(ctx, nil)
 }

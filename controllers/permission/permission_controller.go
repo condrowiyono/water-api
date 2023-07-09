@@ -2,23 +2,25 @@ package permission
 
 import (
 	"fmt"
-	"mini-bank/helpers"
 	"mini-bank/models"
 	"mini-bank/repository"
+	"mini-bank/utils"
 
 	"github.com/gin-gonic/gin"
 )
 
+type Filter struct {
+	Name string `form:"name"`
+}
+
 func GetAll(ctx *gin.Context) {
 	var permission []*models.Permission
-	var filter models.Permission
-
-	name := ctx.Query("name")
-	filter = models.Permission{Name: name}
-	pagination := helpers.GetPagination(ctx)
+	var filter Filter
+	ctx.BindQuery(&filter)
+	pagination := utils.GetPagination(ctx)
 	repository.GetWithFilter(&permission, &filter, pagination)
 
-	helpers.ResponseSuccess(ctx, permission)
+	utils.ResponseSuccess(ctx, permission)
 }
 
 func Create(ctx *gin.Context) {
@@ -26,17 +28,17 @@ func Create(ctx *gin.Context) {
 
 	err := ctx.BindJSON(&permission)
 	if err != nil {
-		helpers.ResponseBadRequest(ctx, err)
+		utils.ResponseBadRequest(ctx, err)
 		return
 	}
 
 	err = repository.Create(&permission)
 	if err != nil {
-		helpers.ResponseBadRequest(ctx, err)
+		utils.ResponseBadRequest(ctx, err)
 		return
 	}
 
-	helpers.ResponseCreated(ctx, permission)
+	utils.ResponseCreated(ctx, permission)
 }
 
 func GetByID(ctx *gin.Context) {
@@ -47,11 +49,11 @@ func GetByID(ctx *gin.Context) {
 
 	fmt.Println("err", err)
 	if err != nil {
-		helpers.ResponseNotFound(ctx, err)
+		utils.ResponseNotFound(ctx, err)
 		return
 	}
 
-	helpers.ResponseSuccess(ctx, permission)
+	utils.ResponseSuccess(ctx, permission)
 }
 
 func Update(ctx *gin.Context) {
@@ -60,23 +62,23 @@ func Update(ctx *gin.Context) {
 	err := repository.GetByID(&permission, id)
 
 	if err != nil {
-		helpers.ResponseNotFound(ctx, err)
+		utils.ResponseNotFound(ctx, err)
 		return
 	}
 
 	err = ctx.BindJSON(&permission)
 	if err != nil {
-		helpers.ResponseBadRequest(ctx, err)
+		utils.ResponseBadRequest(ctx, err)
 		return
 	}
 
 	err = repository.Update(&permission)
 	if err != nil {
-		helpers.ResponseBadRequest(ctx, err)
+		utils.ResponseBadRequest(ctx, err)
 		return
 	}
 
-	helpers.ResponseSuccess(ctx, permission)
+	utils.ResponseSuccess(ctx, permission)
 }
 
 func Delete(ctx *gin.Context) {
@@ -85,15 +87,15 @@ func Delete(ctx *gin.Context) {
 	err := repository.GetByID(&permission, id)
 
 	if err != nil {
-		helpers.ResponseNotFound(ctx, err)
+		utils.ResponseNotFound(ctx, err)
 		return
 	}
 
 	err = repository.Delete(&permission)
 	if err != nil {
-		helpers.ResponseBadRequest(ctx, err)
+		utils.ResponseBadRequest(ctx, err)
 		return
 	}
 
-	helpers.ResponseSuccess(ctx, permission)
+	utils.ResponseSuccess(ctx, permission)
 }
