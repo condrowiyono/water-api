@@ -2,7 +2,6 @@ package repository
 
 import (
 	"errors"
-	"fmt"
 	"mini-bank/infra/database"
 	"mini-bank/infra/logger"
 	"mini-bank/models"
@@ -24,9 +23,6 @@ func AddPermissionsToRole(roleID string, permissions []string) error {
 	if permissionsIDs.RowsAffected == 0 {
 		return gorm.ErrRecordNotFound
 	}
-
-	fmt.Println("role", role)
-	fmt.Println("permission test test", permission)
 
 	err = database.DB.Model(&role).Association("Permissions").Replace(permission)
 

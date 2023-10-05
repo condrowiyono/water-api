@@ -2,10 +2,14 @@ package routers
 
 import (
 	"mini-bank/controllers/auth"
+	"mini-bank/controllers/climate"
 	"mini-bank/controllers/example"
 	"mini-bank/controllers/permission"
+	"mini-bank/controllers/rainfall"
+	"mini-bank/controllers/river"
 	"mini-bank/controllers/role"
 	"mini-bank/controllers/user"
+	"mini-bank/controllers/waterlevel"
 	"mini-bank/routers/middleware"
 	"net/http"
 
@@ -29,6 +33,7 @@ func RegisterRoutes(route *gin.Engine) {
 
 		meRoute.GET("", auth.GetProfile)
 	}
+
 	adminRoute := route.Group("/admin")
 	{
 		adminRoute.Use(middleware.AuthMiddleware())
@@ -52,6 +57,41 @@ func RegisterRoutes(route *gin.Engine) {
 		adminRoute.POST("/users", user.Create)
 		adminRoute.PUT("/users/:id", user.Update)
 		adminRoute.DELETE("/users/:id", user.Delete)
+
+		adminRoute.GET("/rivers", river.GetAll)
+		adminRoute.GET("/rivers/:id", river.GetByID)
+		adminRoute.POST("/rivers", river.Create)
+		adminRoute.PUT("/rivers/:id", river.Update)
+		adminRoute.DELETE("/rivers/:id", river.Delete)
+
+		adminRoute.GET("/waterlevels/export/:river", waterlevel.ExportByID)
+		adminRoute.GET("/rainfalls/export/:river", rainfall.ExportByID)
+		adminRoute.GET("/climates/export/:river", climate.ExportByID)
+	}
+
+	mobileRoute := route.Group("/mobile")
+	{
+		mobileRoute.Use(middleware.AuthMiddleware())
+
+		mobileRoute.GET("/waterlevels", waterlevel.GetAll)
+		mobileRoute.GET("/waterlevels/:id", waterlevel.GetByID)
+		mobileRoute.POST("/waterlevels", waterlevel.Create)
+		mobileRoute.PUT("/waterlevels/:id", waterlevel.Update)
+		mobileRoute.DELETE("/waterlevels/:id", waterlevel.Delete)
+		mobileRoute.GET("/waterlevels/export/:river", waterlevel.ExportByID)
+
+		mobileRoute.GET("/rainfalls", rainfall.GetAll)
+		mobileRoute.GET("/rainfalls/:id", rainfall.GetByID)
+		mobileRoute.POST("/rainfalls", rainfall.Create)
+		mobileRoute.PUT("/rainfalls/:id", rainfall.Update)
+		mobileRoute.DELETE("/rainfalls/:id", rainfall.Delete)
+
+		mobileRoute.GET("/climates", climate.GetAll)
+		mobileRoute.GET("/climates/:id", climate.GetByID)
+		mobileRoute.POST("/climates", climate.Create)
+		mobileRoute.PUT("/climates/:id", climate.Update)
+		mobileRoute.DELETE("/climates/:id", climate.Delete)
+
 	}
 
 }

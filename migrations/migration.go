@@ -10,9 +10,15 @@ import (
 func Migrate() {
 	var migrationModels = []interface{}{
 		&models.Example{},
+		&models.RiverObservation{},
 		&models.Permission{},
 		&models.Role{},
 		&models.User{},
+
+		// data
+		&models.RainfallObservation{},
+		&models.WaterLevelObservation{},
+		&models.ClimateObservation{},
 	}
 
 	err := database.DB.AutoMigrate(migrationModels...)
