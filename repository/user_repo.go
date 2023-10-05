@@ -18,9 +18,8 @@ func GetAllUser(model interface{}, filter interface{}, pagination utils.Paginati
 	if filter != nil {
 		value := reflect.ValueOf(filter).Elem()
 		clauses := map[string]string{
-			"email":         utils.ReflectValueToString(value, "Email"),
-			"name":          utils.ReflectValueToString(value, "Name"),
-			"faculty_email": utils.ReflectValueToString(value, "FacultyEmail"),
+			"email": utils.ReflectValueToString(value, "Email"),
+			"name":  utils.ReflectValueToString(value, "Name"),
 		}
 
 		for key, value := range clauses {
@@ -40,9 +39,9 @@ func GetAllUser(model interface{}, filter interface{}, pagination utils.Paginati
 	return count, query.Error
 }
 
-func GetUserByIdentifier(model interface{}, identifier string) error {
+func GetUserByEmail(model interface{}, email string) error {
 	err := database.DB.
-		Where("email = ? OR faculty_email = ?", identifier, identifier).
+		Where("email = ?", email).
 		First(model).Error
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -76,7 +75,7 @@ func AttachRoleToUser(userID string, roles []string) error {
 	return nil
 }
 
-func GetUsersPermission(model interface{}, userID string) error {
+func GetUsersPermission(model interface{}, userID uint) error {
 	err := database.DB.
 		Where("id = ?", userID).
 		Preload("Roles.Permissions").

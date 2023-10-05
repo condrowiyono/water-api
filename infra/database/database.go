@@ -7,7 +7,6 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"gorm.io/plugin/dbresolver"
 )
 
 var (
@@ -16,11 +15,10 @@ var (
 )
 
 // DbConnection create database connection
-func DbConnection(masterDSN, replicaDSN string) error {
+func DbConnection(masterDSN string) error {
 	var db = DB
 
 	logMode := viper.GetBool("DB_LOG_MODE")
-	debug := viper.GetBool("DEBUG")
 
 	loglevel := logger.Silent
 	if logMode {
@@ -30,14 +28,7 @@ func DbConnection(masterDSN, replicaDSN string) error {
 	db, err = gorm.Open(mysql.Open(masterDSN), &gorm.Config{
 		Logger: logger.Default.LogMode(loglevel),
 	})
-	if !debug {
-		db.Use(dbresolver.Register(dbresolver.Config{
-			Replicas: []gorm.Dialector{
-				mysql.Open(replicaDSN),
-			},
-			Policy: dbresolver.RandomPolicy{},
-		}))
-	}
+
 	if err != nil {
 		log.Fatalf(`Db connection error, %v`, err)
 		return err

@@ -2,15 +2,18 @@ package models
 
 import (
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type Role struct {
-	Id          string       `gorm:"type:VARCHAR(36);primary_key;" json:"id"`
-	Name        string       `gorm:"unique" json:"name" binding:"required"`
-	Description string       `json:"description" binding:"required"`
-	CreatedAt   *time.Time   `json:"created_at"`
-	UpdatedAt   *time.Time   `json:"updated_at"`
-	Permissions []Permission `gorm:"many2many:role_permissions;" json:"permissions,omitempty"`
+	ID          uint           `gorm:"primarykey"`
+	Name        string         `gorm:"unique" json:"name" binding:"required"`
+	Description string         `json:"description" binding:"required"`
+	Permissions []Permission   `gorm:"many2many:role_permissions;" json:"permissions,omitempty"`
+	CreatedAt   time.Time      `json:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at"`
+	DeletedAt   gorm.DeletedAt `gorm:"index" json:"deleted_at"`
 }
 
 // TableName is Database TableName of this model

@@ -23,8 +23,12 @@ func RegisterRoutes(route *gin.Engine) {
 	route.POST("/login", auth.Login)
 	route.POST("/register", auth.Register)
 
-	route.Use(middleware.AuthMiddleware()).GET("/me", auth.GetProfile)
+	meRoute := route.Group("/me")
+	{
+		meRoute.Use(middleware.AuthMiddleware())
 
+		meRoute.GET("", auth.GetProfile)
+	}
 	adminRoute := route.Group("/admin")
 	{
 		adminRoute.Use(middleware.AuthMiddleware())

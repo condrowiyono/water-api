@@ -11,8 +11,6 @@ import (
 )
 
 func Create(model interface{}) error {
-	utils.AddUUIDToModel(model)
-
 	err := database.DB.Create(model).Error
 	if err != nil {
 		logger.Errorf("error, not save data %v", err)

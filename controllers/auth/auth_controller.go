@@ -13,8 +13,13 @@ func Login(ctx *gin.Context) {
 	var login LoginDTO
 	var user models.User
 
-	ctx.BindJSON(&login)
-	err := repository.GetUserByIdentifier(&user, login.Identifier)
+	err := ctx.BindJSON(&login)
+	if err != nil {
+		utils.ResponseNotFound(ctx, err)
+		return
+	}
+
+	err = repository.GetUserByEmail(&user, login.Email)
 	if err != nil {
 		utils.ResponseNotFound(ctx, err)
 		return
@@ -23,11 +28,11 @@ func Login(ctx *gin.Context) {
 	err = utils.CheckPasswordHash(login.Password, user.Password)
 
 	if err != nil {
-		utils.ResponseUnauthorized(ctx, err)
+		utils.ResponseUnauthorized(ctx, errors.New("invalid password"))
 		return
 	}
 
-	token, err := utils.GenerateToken(utils.TokenPayload{Id: user.Id, Email: user.Email})
+	token, err := utils.GenerateToken(utils.TokenPayload{Id: user.ID, Email: user.Email})
 	if err != nil {
 		utils.ResponseUnauthorized(ctx, errors.New("failed to generate token"))
 		return
@@ -54,7 +59,7 @@ func Register(ctx *gin.Context) {
 	}
 
 	//Auto login after register
-	token, err := utils.GenerateToken(utils.TokenPayload{Id: user.Id, Email: user.Email})
+	token, err := utils.GenerateToken(utils.TokenPayload{Id: user.ID, Email: user.Email})
 	if err != nil {
 		utils.ResponseUnauthorized(ctx, errors.New("failed to generate token"))
 		return
@@ -69,8 +74,8 @@ func Register(ctx *gin.Context) {
 func GetProfile(ctx *gin.Context) {
 	var user models.User
 
-	id := ctx.MustGet("Id").(string)
-	err := repository.GetUsersPermission(&user, id)
+	id := ctx.MustGet("Id").(float64)
+	err := repository.GetUsersPermission(&user, uint(id))
 
 	if err != nil {
 		utils.ResponseNotFound(ctx, err)

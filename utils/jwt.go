@@ -26,7 +26,7 @@ var (
 )
 
 type TokenPayload struct {
-	Id    string `json:"id"`
+	Id    uint   `json:"id"`
 	Email string `json:"email"`
 }
 
