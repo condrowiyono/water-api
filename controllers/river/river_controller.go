@@ -24,6 +24,21 @@ func GetAll(ctx *gin.Context) {
 	utils.ResponseListSuccess(ctx, river, utils.Meta{Page: pagination.Page, Limit: pagination.Limit, Total: total})
 }
 
+func GetAllNoPagination(ctx *gin.Context) {
+	var river []*models.RiverObservation
+	var filter RiverFilterDTO
+	ctx.BindQuery(&filter)
+
+	err := repository.Get(&river, &filter)
+
+	if err != nil {
+		utils.ResponseBadRequest(ctx, err)
+		return
+	}
+
+	utils.ResponseListSuccess(ctx, river, utils.Meta{Page: 1, Limit: 1, Total: 1})
+}
+
 func Create(ctx *gin.Context) {
 	var river models.RiverObservation
 

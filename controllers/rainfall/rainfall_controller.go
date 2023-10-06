@@ -29,12 +29,16 @@ func GetAll(ctx *gin.Context) {
 
 func Create(ctx *gin.Context) {
 	var rainfall models.RainfallObservation
+	var userID = ctx.MustGet("Id").(float64)
 
 	err := ctx.BindJSON(&rainfall)
+
 	if err != nil {
 		utils.ResponseBadRequest(ctx, err)
 		return
 	}
+
+	rainfall.UserID = uint(userID)
 
 	err = repository.Create(&rainfall)
 	if err != nil {
@@ -99,6 +103,20 @@ func Delete(ctx *gin.Context) {
 	err = repository.Delete(&rainfall)
 	if err != nil {
 		utils.ResponseBadRequest(ctx, err)
+		return
+	}
+
+	utils.ResponseSuccess(ctx, rainfall)
+}
+
+func GetToday(ctx *gin.Context) {
+	var rainfall models.RainfallObservation
+	riverID := ctx.Param("river")
+
+	err := repository.GetToday(&rainfall, riverID)
+
+	if err != nil {
+		utils.ResponseSuccess(ctx, nil)
 		return
 	}
 

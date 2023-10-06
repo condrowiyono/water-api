@@ -38,7 +38,7 @@ func Login(ctx *gin.Context) {
 		return
 	}
 
-	utils.ResponseSuccess(ctx, gin.H{"token": token})
+	utils.ResponseSuccess(ctx, gin.H{"user": user, "token": token})
 }
 
 func Register(ctx *gin.Context) {

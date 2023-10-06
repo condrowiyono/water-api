@@ -28,6 +28,7 @@ func GetAll(ctx *gin.Context) {
 }
 
 func Create(ctx *gin.Context) {
+	var userID = ctx.MustGet("Id").(float64)
 	var waterlevel models.WaterLevelObservation
 
 	err := ctx.BindJSON(&waterlevel)
@@ -35,6 +36,8 @@ func Create(ctx *gin.Context) {
 		utils.ResponseBadRequest(ctx, err)
 		return
 	}
+
+	waterlevel.UserID = uint(userID)
 
 	err = repository.Create(&waterlevel)
 	if err != nil {
@@ -100,6 +103,20 @@ func Delete(ctx *gin.Context) {
 	}
 
 	utils.ResponseSuccess(ctx, nil)
+}
+
+func GetToday(ctx *gin.Context) {
+	var waterlevel []models.WaterLevelObservation
+	riverID := ctx.Param("river")
+
+	err := repository.FindToday(&waterlevel, riverID)
+
+	if err != nil {
+		utils.ResponseSuccess(ctx, nil)
+		return
+	}
+
+	utils.ResponseSuccess(ctx, waterlevel)
 }
 
 func ExportByID(ctx *gin.Context) {

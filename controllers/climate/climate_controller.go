@@ -29,12 +29,14 @@ func GetAll(ctx *gin.Context) {
 
 func Create(ctx *gin.Context) {
 	var climate models.ClimateObservation
+	var userID = ctx.MustGet("Id").(float64)
 
 	err := ctx.BindJSON(&climate)
 	if err != nil {
 		utils.ResponseBadRequest(ctx, err)
 		return
 	}
+	climate.UserID = uint(userID)
 
 	err = repository.Create(&climate)
 	if err != nil {
@@ -100,6 +102,20 @@ func Delete(ctx *gin.Context) {
 	err = repository.Delete(&climate)
 	if err != nil {
 		utils.ResponseBadRequest(ctx, err)
+		return
+	}
+
+	utils.ResponseSuccess(ctx, climate)
+}
+
+func GetToday(ctx *gin.Context) {
+	var climate models.ClimateObservation
+	riverID := ctx.Param("river")
+
+	err := repository.GetToday(&climate, riverID)
+
+	if err != nil {
+		utils.ResponseSuccess(ctx, nil)
 		return
 	}
 

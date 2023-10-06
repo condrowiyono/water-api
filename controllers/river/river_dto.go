@@ -4,6 +4,6 @@ import "mini-bank/utils"
 
 type RiverFilterDTO struct {
 	utils.Pagination
-	Name string `gorm:"name" form:"name"`
-	Type string `gorm:"type" form:"type"`
+	Name string `json:"name" form:"name"`
+	Type string `json:"type" form:"type"`
 }

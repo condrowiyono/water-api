@@ -11,7 +11,7 @@ import (
 
 func GetData(ctx *gin.Context) {
 	var example []*models.Example
-	repository.Get(&example)
+	repository.Get(&example, nil)
 
 	ctx.JSON(http.StatusOK, utils.Response{
 		Code:    http.StatusOK,

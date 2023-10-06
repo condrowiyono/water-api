@@ -10,7 +10,7 @@ type WaterLevelObservation struct {
 	ID          uint              `gorm:"primarykey" json:"id"`
 	RiverID     uint              `json:"river_id" binding:"required" form:"river_id"`
 	River       *RiverObservation `json:"river"`
-	Date        time.Time         `json:"date" binding:"required" form:"date"`
+	Date        time.Time         `json:"date" form:"date"`
 	Data        float64           `json:"data" binding:"required" form:"data"`
 	Observation string            `json:"observation"` // Manual or Telemetry
 	Descrption  string            `json:"description"`

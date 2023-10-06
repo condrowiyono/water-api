@@ -27,6 +27,9 @@ func RegisterRoutes(route *gin.Engine) {
 	route.POST("/login", auth.Login)
 	route.POST("/register", auth.Register)
 
+	route.GET("/rivers", river.GetAllNoPagination)
+	route.GET("/rivers/:id", river.GetByID)
+
 	meRoute := route.Group("/me")
 	{
 		meRoute.Use(middleware.AuthMiddleware())
@@ -73,22 +76,28 @@ func RegisterRoutes(route *gin.Engine) {
 	{
 		mobileRoute.Use(middleware.AuthMiddleware())
 
+		mobileRoute.POST("/waterlevels", waterlevel.Create)
+		mobileRoute.GET("/waterlevels/today/:river", waterlevel.GetToday)
+
 		mobileRoute.GET("/waterlevels", waterlevel.GetAll)
 		mobileRoute.GET("/waterlevels/:id", waterlevel.GetByID)
-		mobileRoute.POST("/waterlevels", waterlevel.Create)
 		mobileRoute.PUT("/waterlevels/:id", waterlevel.Update)
 		mobileRoute.DELETE("/waterlevels/:id", waterlevel.Delete)
 		mobileRoute.GET("/waterlevels/export/:river", waterlevel.ExportByID)
 
-		mobileRoute.GET("/rainfalls", rainfall.GetAll)
-		mobileRoute.GET("/rainfalls/:id", rainfall.GetByID)
 		mobileRoute.POST("/rainfalls", rainfall.Create)
-		mobileRoute.PUT("/rainfalls/:id", rainfall.Update)
-		mobileRoute.DELETE("/rainfalls/:id", rainfall.Delete)
+		mobileRoute.GET("/rainfalls/today/:river", rainfall.GetToday)
+
+		// mobileRoute.GET("/rainfalls", rainfall.GetAll)
+		// mobileRoute.GET("/rainfalls/:id", rainfall.GetByID)
+		// mobileRoute.PUT("/rainfalls/:id", rainfall.Update)
+		// mobileRoute.DELETE("/rainfalls/:id", rainfall.Delete)
+
+		mobileRoute.POST("/climates", climate.Create)
+		mobileRoute.GET("/climates/today/:river", climate.GetToday)
 
 		mobileRoute.GET("/climates", climate.GetAll)
 		mobileRoute.GET("/climates/:id", climate.GetByID)
-		mobileRoute.POST("/climates", climate.Create)
 		mobileRoute.PUT("/climates/:id", climate.Update)
 		mobileRoute.DELETE("/climates/:id", climate.Delete)
 

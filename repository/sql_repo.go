@@ -20,9 +20,15 @@ func Create(model interface{}) error {
 	return nil
 }
 
-func Get(model interface{}) error {
-	err := database.DB.Order("created_at DESC").Find(model).Error
-	return err
+func Get(model interface{}, filter interface{}) error {
+
+	query := database.DB.Order("created_at DESC")
+
+	if filter != nil {
+		query = query.Where(filter)
+	}
+
+	return query.Find(model).Error
 }
 
 func GetWithPreload(model interface{}, preload string) error {
