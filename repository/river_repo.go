@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+const DEFAULT_TIME_ZONE = "Asia/Singapore"
+
 func ExportObservationByYear(model interface{}, id, year string) error {
 	query := database.DB.Model(model).Where("river_id = ?", id).Where("date LIKE ?", year+"%").Preload("User").Find(model)
 
@@ -13,8 +15,8 @@ func ExportObservationByYear(model interface{}, id, year string) error {
 }
 
 func GetToday(model interface{}, id string) error {
-	startTime := utils.StartOfDay(time.Now(), "Asia/Makassar").UTC()
-	endTime := utils.EndOfDay(time.Now(), "Asia/Makassar").UTC()
+	startTime := utils.StartOfDay(time.Now(), DEFAULT_TIME_ZONE).UTC()
+	endTime := utils.EndOfDay(time.Now(), DEFAULT_TIME_ZONE).UTC()
 
 	query := database.DB.Model(model).Where("river_id = ?", id).Where("date BETWEEN ? AND ?", startTime, endTime).Preload("User").First(model)
 
@@ -22,8 +24,8 @@ func GetToday(model interface{}, id string) error {
 }
 
 func FindToday(model interface{}, id string) error {
-	startTime := utils.StartOfDay(time.Now(), "Asia/Makassar").UTC()
-	endTime := utils.EndOfDay(time.Now(), "Asia/Makassar").UTC()
+	startTime := utils.StartOfDay(time.Now(), DEFAULT_TIME_ZONE).UTC()
+	endTime := utils.EndOfDay(time.Now(), DEFAULT_TIME_ZONE).UTC()
 
 	query := database.DB.Model(model).Where("river_id = ?", id).Where("date BETWEEN ? AND ?", startTime, endTime).Preload("User").Find(model)
 
