@@ -29,6 +29,11 @@ WORKDIR /root/
 COPY --from=builder /app/main .
 COPY --from=builder /app/.env .env
 
+# Download tzdata
+ADD https://github.com/golang/go/raw/master/lib/time/zoneinfo.zip /zoneinfo.zip
+RUN chmod +r /zoneinfo.zip
+ENV ZONEINFO /zoneinfo.zip
+
 # Expose port 8080 to the outside world
 EXPOSE 8000
 
