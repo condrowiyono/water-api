@@ -11,7 +11,7 @@ import (
 func Search(field, search string) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 		if search != "" {
-			db = db.Where(fmt.Sprintf("%s LIKE ?", field), fmt.Sprintf("%%%s%%", search))
+			db = db.Where(fmt.Sprintf("lower(%s) LIKE ?", field), fmt.Sprintf("%%%s%%", search))
 		}
 		return db
 	}
