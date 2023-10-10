@@ -29,6 +29,7 @@ func RegisterRoutes(route *gin.Engine) {
 
 	route.GET("/rivers", river.GetAllNoPagination)
 	route.GET("/rivers/:id", river.GetByID)
+	route.GET("/rivers-count", river.GetRiverCount)
 	route.GET("/rainfalls/today/:river", rainfall.GetToday)
 	route.GET("/waterlevels/today/:river", waterlevel.GetToday)
 	route.GET("/climates/today/:river", climate.GetToday)

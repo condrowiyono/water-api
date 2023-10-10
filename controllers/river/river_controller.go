@@ -1,6 +1,7 @@
 package river
 
 import (
+	"mini-bank/infra/database"
 	"mini-bank/models"
 	"mini-bank/repository"
 	"mini-bank/utils"
@@ -112,4 +113,39 @@ func Delete(ctx *gin.Context) {
 	}
 
 	utils.ResponseSuccess(ctx, river)
+}
+
+func GetRiverCount(ctx *gin.Context) {
+	result := make(map[string]map[string]int)
+
+	rows, err := database.DB.Table("river_observations").Select("type, observation, count(*) as count").Group("type, observation").Rows()
+	if err != nil {
+		utils.ResponseBadRequest(ctx, err)
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var riverType, observation string
+		var count int
+		err := rows.Scan(&riverType, &observation, &count)
+		if err != nil {
+			utils.ResponseBadRequest(ctx, err)
+			return
+		}
+
+		if _, ok := result[riverType]; !ok {
+			result[riverType] = make(map[string]int)
+		}
+
+		result[riverType][observation] = count
+	}
+
+	// Calculate total count for each type
+	for _, counts := range result {
+		total := counts["manual"] + counts["telemetry"]
+		counts["total"] = total
+	}
+
+	utils.ResponseSuccess(ctx, &result)
 }

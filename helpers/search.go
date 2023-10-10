@@ -38,7 +38,7 @@ func WithPagination(pagination utils.Pagination) func(db *gorm.DB) *gorm.DB {
 			page = 1
 		}
 		if limit <= 0 {
-			limit = 10
+			limit = 20
 		} else if limit > 100 {
 			limit = 100
 		}
