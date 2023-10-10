@@ -38,6 +38,13 @@ func Login(ctx *gin.Context) {
 		return
 	}
 
+	user.Password = ""
+
+	if user.River != nil {
+		user.RiverType = user.River.Type
+		user.River = nil
+	}
+
 	utils.ResponseSuccess(ctx, gin.H{"user": user, "token": token})
 }
 

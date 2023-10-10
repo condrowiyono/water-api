@@ -42,6 +42,8 @@ func GetAllUser(model interface{}, filter interface{}, pagination utils.Paginati
 func GetUserByEmail(model interface{}, email string) error {
 	err := database.DB.
 		Where("email = ?", email).
+		Preload("Roles").
+		Preload("River").
 		First(model).Error
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {

@@ -106,7 +106,7 @@ func Delete(ctx *gin.Context) {
 }
 
 func GetToday(ctx *gin.Context) {
-	var waterlevel []models.WaterLevelObservation
+	var waterlevel *[]models.WaterLevelObservation
 	riverID := ctx.Param("river")
 
 	err := repository.FindToday(&waterlevel, riverID)

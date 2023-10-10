@@ -14,7 +14,7 @@ func GetAll(ctx *gin.Context) {
 	ctx.BindQuery(&filter)
 
 	pagination := utils.Pagination{Page: filter.Page, Limit: filter.Limit}
-	total, err := repository.GetWithFilter(&river, &filter, pagination)
+	total, err := repository.GetWithSearchFilter(&river, &filter, &pagination, nil)
 
 	if err != nil {
 		utils.ResponseBadRequest(ctx, err)

@@ -6,6 +6,7 @@ import (
 	"mini-bank/infra/database"
 	"mini-bank/infra/logger"
 	"mini-bank/utils"
+	"reflect"
 
 	"gorm.io/gorm"
 )
@@ -48,6 +49,40 @@ func GetWithFilter(model interface{}, filter interface{}, pagination utils.Pagin
 	query.Model(model).Count(&count)
 
 	return count, query.Scopes(helpers.WithPagination(pagination)).Order("created_at DESC").Find(model).Error
+}
+
+func GetWithSearchFilter(model interface{}, filter interface{}, pagination *utils.Pagination, preload *[]string) (int64, error) {
+	var count int64
+
+	query := database.DB
+
+	if filter != nil {
+		value := reflect.ValueOf(filter).Elem()
+
+		clauses := map[string]string{
+			"name":  utils.ReflectValueToString(value, "Name"),
+			"email": utils.ReflectValueToString(value, "Email"),
+			"type":  utils.ReflectValueToString(value, "Type"),
+		}
+
+		for key, value := range clauses {
+			query = query.Scopes(helpers.Search(key, value))
+		}
+	}
+
+	query.Model(model).Count(&count)
+
+	if pagination != nil {
+		query = query.Scopes(helpers.WithPagination(*pagination))
+	}
+
+	if preload != nil {
+		for _, value := range *preload {
+			query = query.Preload(value)
+		}
+	}
+
+	return count, query.Order("created_at DESC").Find(model).Error
 }
 
 func GetWithFilterWithPreload(model interface{}, filter interface{}, pagination utils.Pagination, preload string) error {
