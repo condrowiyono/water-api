@@ -7,9 +7,12 @@ import (
 	"mini-bank/repository"
 	"mini-bank/utils"
 	"mini-bank/utils/excel"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
+
+const DEFAULT_TIME_ZONE = "Asia/Singapore"
 
 func GetAll(ctx *gin.Context) {
 	var rainfall []*models.RainfallObservation
@@ -140,6 +143,7 @@ func ExportByID(ctx *gin.Context) {
 		utils.ResponseBadRequest(ctx, err)
 		return
 	}
+	location, _ := time.LoadLocation(DEFAULT_TIME_ZONE)
 
 	file, err := excel.CreateFile()
 	row := 1
@@ -161,13 +165,13 @@ func ExportByID(ctx *gin.Context) {
 	for _, d := range rainfall {
 
 		data := []string{
-			d.Date.Format("2006-01-02"),
+			d.Date.In(location).Format("2006-01-02"),
 			fmt.Sprintf("%v", d.Data),
 			fmt.Sprintf("%v", d.Duration),
 			d.Descrption,
 			d.Event,
-			d.CreatedAt.Format("2006-01-02 15:04:05"),
-			d.UpdatedAt.Format("2006-01-02 15:04:05"),
+			d.CreatedAt.In(location).Format("2006-01-02 15:04:05"),
+			d.UpdatedAt.In(location).Format("2006-01-02 15:04:05"),
 			d.User.Email,
 		}
 		excel.SetRow(file, data, row, "")
