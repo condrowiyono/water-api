@@ -147,6 +147,9 @@ func ExportByID(ctx *gin.Context) {
 	header := []string{
 		"Date",
 		"Data",
+		"Durasi",
+		"Keterangan",
+		"Kejadian",
 		"Created At",
 		"Updated At",
 		"Created By",
@@ -160,6 +163,9 @@ func ExportByID(ctx *gin.Context) {
 		data := []string{
 			d.Date.Format("2006-01-02"),
 			fmt.Sprintf("%v", d.Data),
+			fmt.Sprintf("%v", d.Duration),
+			d.Descrption,
+			d.Event,
 			d.CreatedAt.Format("2006-01-02 15:04:05"),
 			d.UpdatedAt.Format("2006-01-02 15:04:05"),
 			d.User.Email,
