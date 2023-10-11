@@ -8,6 +8,7 @@ import (
 	"mini-bank/controllers/rainfall"
 	"mini-bank/controllers/river"
 	"mini-bank/controllers/role"
+	"mini-bank/controllers/upload"
 	"mini-bank/controllers/user"
 	"mini-bank/controllers/waterlevel"
 	"mini-bank/routers/middleware"
@@ -21,6 +22,7 @@ func RegisterRoutes(route *gin.Engine) {
 	route.NoRoute(func(ctx *gin.Context) {
 		ctx.JSON(http.StatusNotFound, gin.H{"status": http.StatusNotFound, "message": "Route Not Found"})
 	})
+
 	route.GET("/health", func(ctx *gin.Context) { ctx.JSON(http.StatusOK, gin.H{"live": "ok"}) })
 
 	route.GET("/example", example.GetData)
@@ -33,6 +35,8 @@ func RegisterRoutes(route *gin.Engine) {
 	route.GET("/rainfalls/today/:river", rainfall.GetToday)
 	route.GET("/waterlevels/today/:river", waterlevel.GetToday)
 	route.GET("/climates/today/:river", climate.GetToday)
+
+	route.POST("/upload", upload.UploadImage)
 
 	meRoute := route.Group("/me")
 	{
@@ -97,6 +101,11 @@ func RegisterRoutes(route *gin.Engine) {
 		mobileRoute.POST("/waterlevels", waterlevel.Create)
 		mobileRoute.POST("/rainfalls", rainfall.Create)
 		mobileRoute.POST("/climates", climate.Create)
+	}
+
+	staticRoute := route.Group("/public")
+	{
+		staticRoute.Static("", "./public")
 	}
 
 }

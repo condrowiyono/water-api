@@ -141,11 +141,5 @@ func GetRiverCount(ctx *gin.Context) {
 		result[riverType][observation] = count
 	}
 
-	// Calculate total count for each type
-	for _, counts := range result {
-		total := counts["manual"] + counts["telemetry"]
-		counts["total"] = total
-	}
-
 	utils.ResponseSuccess(ctx, &result)
 }
