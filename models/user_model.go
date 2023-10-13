@@ -18,9 +18,9 @@ type User struct {
 	PasswordTokenExp     *time.Time        `json:"password_token_exp,omitempty"`
 	UserType             string            `json:"user_type"`
 	Roles                []Role            `gorm:"many2many:user_roles;" json:"roles,omitempty"`
-	RiverID              uint              `json:"river_id" form:"river_id"`
-	RiverType            string            `gorm:"-" json:"river_type" form:"river_type"`
+	RiverID              *uint             `json:"river_id" form:"river_id"`
 	River                *RiverObservation `json:"river"`
+	RiverType            string            `gorm:"-" json:"river_type" form:"river_type"`
 	CreatedAt            time.Time         `json:"created_at"`
 	UpdatedAt            time.Time         `json:"updated_at"`
 	DeletedAt            gorm.DeletedAt    `gorm:"index" json:"deleted_at"`
