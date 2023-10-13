@@ -16,6 +16,7 @@ type User struct {
 	IsVerified           *bool             `json:"is_verified"`
 	PasswordToken        string            `json:"password_token,omitempty"`
 	PasswordTokenExp     *time.Time        `json:"password_token_exp,omitempty"`
+	UserType             string            `json:"user_type"`
 	Roles                []Role            `gorm:"many2many:user_roles;" json:"roles,omitempty"`
 	RiverID              uint              `json:"river_id" form:"river_id"`
 	RiverType            string            `gorm:"-" json:"river_type" form:"river_type"`
