@@ -78,6 +78,8 @@ func Update(ctx *gin.Context) {
 		return
 	}
 
+	user.Password = utils.HashPassword(user.Password)
+
 	err = repository.Update(&user)
 	if err != nil {
 		utils.ResponseBadRequest(ctx, err)
