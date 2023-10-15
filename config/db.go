@@ -31,13 +31,14 @@ func DbConfiguration() string {
 	loc, _ := time.LoadLocation(masterDBTimeZone)
 
 	c := mysql.Config{
-		Net:       "tcp",
-		User:      masterDBUser,
-		Passwd:    masterDBPassword,
-		Addr:      fmt.Sprintf("%v:%v", masterDBHost, masterDBPort),
-		DBName:    masterDBName,
-		ParseTime: true,
-		Loc:       loc,
+		Net:                  "tcp",
+		User:                 masterDBUser,
+		Passwd:               masterDBPassword,
+		Addr:                 fmt.Sprintf("%v:%v", masterDBHost, masterDBPort),
+		DBName:               masterDBName,
+		ParseTime:            true,
+		Loc:                  loc,
+		AllowNativePasswords: true,
 	}
 
 	masterDBDSN := c.FormatDSN()
