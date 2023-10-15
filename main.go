@@ -13,7 +13,6 @@ import (
 
 func main() {
 	//set timezone
-	viper.SetDefault("SERVER_TIMEZONE", "UTC")
 	loc, _ := time.LoadLocation(viper.GetString("SERVER_TIMEZONE"))
 	time.Local = loc
 

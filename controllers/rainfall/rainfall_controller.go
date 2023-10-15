@@ -5,8 +5,11 @@ import (
 	"fmt"
 	"mini-bank/models"
 	"mini-bank/repository"
+	chart "mini-bank/repository/chart/rainfall"
 	"mini-bank/utils"
 	"mini-bank/utils/excel"
+	"reflect"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -129,7 +132,7 @@ func GetToday(ctx *gin.Context) {
 func ExportByID(ctx *gin.Context) {
 	var rainfall []models.RainfallObservation
 	var filter ExportDTO
-	riverID := ctx.Param("river")
+	riverID := ctx.Param("id")
 	ctx.BindQuery(&filter)
 
 	if filter.Year == "" {
@@ -188,4 +191,164 @@ func ExportByID(ctx *gin.Context) {
 	ctx.Header("Content-Transfer-Encoding", "binary")
 
 	file.Write(ctx.Writer)
+}
+
+func GetIntraday(ctx *gin.Context) {
+	var filter ChartDataDTO
+
+	err := ctx.BindQuery(&filter)
+
+	if err != nil {
+		utils.ResponseBadRequest(ctx, err)
+		return
+	}
+
+	data, err := chart.GetRainfallIntraday(filter.Date, filter.RiverID)
+
+	if err != nil {
+		utils.ResponseBadRequest(ctx, err)
+		return
+	}
+
+	utils.ResponseSuccess(ctx, data)
+}
+
+func GetMonthly(ctx *gin.Context) {
+	var filter ChartDataDTO
+
+	err := ctx.BindQuery(&filter)
+
+	if err != nil {
+		utils.ResponseBadRequest(ctx, err)
+		return
+	}
+
+	data, err := chart.GetRainfallMonthly(filter.Date, filter.RiverID)
+
+	if err != nil {
+		utils.ResponseBadRequest(ctx, err)
+		return
+	}
+
+	utils.ResponseSuccess(ctx, data)
+}
+
+func GetYearly(ctx *gin.Context) {
+	var filter ChartDataDTO
+
+	err := ctx.BindQuery(&filter)
+
+	if err != nil {
+		utils.ResponseBadRequest(ctx, err)
+		return
+	}
+
+	data, err := chart.GetRainfallYearly(filter.Date, filter.RiverID)
+
+	if err != nil {
+		utils.ResponseBadRequest(ctx, err)
+		return
+	}
+
+	utils.ResponseSuccess(ctx, data)
+}
+
+func GetMax(ctx *gin.Context) {
+	var filter ChartDataDTO
+
+	err := ctx.BindQuery(&filter)
+
+	if err != nil {
+		utils.ResponseBadRequest(ctx, err)
+		return
+	}
+
+	data, err := chart.GetRainfallMax(filter.Date, filter.RiverID)
+
+	if err != nil {
+		utils.ResponseBadRequest(ctx, err)
+		return
+	}
+
+	utils.ResponseSuccess(ctx, data)
+}
+
+func Import(ctx *gin.Context) {
+	var rainfall []models.RainfallObservation
+	id := ctx.Param("id")
+	var userID = ctx.MustGet("Id").(float64)
+
+	file, err := ctx.FormFile("file")
+	if err != nil {
+		utils.ResponseBadRequest(ctx, err)
+		return
+	}
+
+	f, err := file.Open()
+	if err != nil {
+		utils.ResponseBadRequest(ctx, err)
+		return
+	}
+
+	defer f.Close()
+
+	results, headers, err := excel.ReadXLSX(f)
+	if err != nil {
+		utils.ResponseBadRequest(ctx, err)
+		return
+	}
+
+	expectedHeader := []string{
+		"Date",
+		"Data",
+	}
+
+	if !reflect.DeepEqual(headers, expectedHeader) {
+		utils.ResponseBadRequest(ctx, errors.New("invalid header"))
+		return
+	}
+
+	for _, result := range results {
+		var item models.RainfallObservation
+		parsedId, err := strconv.Atoi(id)
+		if err != nil {
+			utils.ResponseBadRequest(ctx, err)
+			return
+		}
+
+		location, _ := time.LoadLocation(DEFAULT_TIME_ZONE)
+		parsedDate, err := time.ParseInLocation("2006-01-02", result[0], location)
+
+		if err != nil {
+			utils.ResponseBadRequest(ctx, err)
+			return
+		}
+
+		if (len(result) < 2) || (result[1] == "") {
+			continue
+		}
+
+		data := result[1]
+		parserData, err := strconv.ParseFloat(data, 64)
+		if err != nil {
+			utils.ResponseBadRequest(ctx, err)
+			return
+		}
+
+		item.RiverID = uint(parsedId)
+		item.Date = parsedDate
+		item.Data = parserData
+		item.UserID = uint(userID)
+
+		rainfall = append(rainfall, item)
+	}
+
+	err = repository.Create(&rainfall)
+
+	if err != nil {
+		utils.ResponseBadRequest(ctx, err)
+		return
+	}
+
+	utils.ResponseSuccess(ctx, rainfall)
 }

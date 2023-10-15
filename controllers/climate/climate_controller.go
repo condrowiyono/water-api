@@ -7,6 +7,8 @@ import (
 	"mini-bank/repository"
 	"mini-bank/utils"
 	"mini-bank/utils/excel"
+	"reflect"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -128,7 +130,7 @@ func GetToday(ctx *gin.Context) {
 func ExportByID(ctx *gin.Context) {
 	var climate []models.ClimateObservation
 	var filter ExportDTO
-	riverID := ctx.Param("river")
+	riverID := ctx.Param("id")
 	ctx.BindQuery(&filter)
 
 	if filter.Year == "" {
@@ -154,11 +156,11 @@ func ExportByID(ctx *gin.Context) {
 		"Min Temperature",
 		"Max Temperature",
 		"Kelembapan",
-		"Kelempapan Basah",
-		"Kelembapan Kering",
 		"Kecepatan Angin",
 		"Durasi Penyinaran Matahari",
 		"Penguapan",
+		"Kelempapan Basah",
+		"Kelembapan Kering",
 		"Minimum Apung",
 		"Maximum Apung",
 		"Hook Naik",
@@ -180,11 +182,11 @@ func ExportByID(ctx *gin.Context) {
 			fmt.Sprintf("%v", d.MinTemperature),
 			fmt.Sprintf("%v", d.MaxTemperature),
 			fmt.Sprintf("%v", d.Humidity),
-			fmt.Sprintf("%v", d.WetHumidity),
-			fmt.Sprintf("%v", d.DryHumidity),
 			fmt.Sprintf("%v", d.WindSpeed),
 			fmt.Sprintf("%v", d.IlluminationDuration),
 			fmt.Sprintf("%v", d.Evaporation),
+			fmt.Sprintf("%v", d.WetHumidity),
+			fmt.Sprintf("%v", d.DryHumidity),
 			fmt.Sprintf("%v", d.MinFloatLevel),
 			fmt.Sprintf("%v", d.MaxFloatLevel),
 			fmt.Sprintf("%v", d.UpperHook),
@@ -208,4 +210,119 @@ func ExportByID(ctx *gin.Context) {
 	ctx.Header("Content-Transfer-Encoding", "binary")
 
 	file.Write(ctx.Writer)
+}
+
+func Import(ctx *gin.Context) {
+	var climate []models.ClimateObservation
+	id := ctx.Param("id")
+	var userID = ctx.MustGet("Id").(float64)
+
+	file, err := ctx.FormFile("file")
+	if err != nil {
+		utils.ResponseBadRequest(ctx, err)
+		return
+	}
+
+	f, err := file.Open()
+	if err != nil {
+		utils.ResponseBadRequest(ctx, err)
+		return
+	}
+
+	defer f.Close()
+
+	results, headers, err := excel.ReadXLSX(f)
+	if err != nil {
+		utils.ResponseBadRequest(ctx, err)
+		return
+	}
+
+	expectedHeader := []string{
+		"Date",
+		"Curah Hujan",
+		"Min Temperature",
+		"Max Temperature",
+		"Kelembapan",
+		"Kecepatan Angin",
+		"Durasi Penyinaran Matahari",
+		"Penguapan",
+	}
+
+	if !reflect.DeepEqual(headers, expectedHeader) {
+		utils.ResponseBadRequest(ctx, errors.New("invalid header"))
+		return
+	}
+
+	for _, result := range results {
+		var item models.ClimateObservation
+		parsedId, err := strconv.Atoi(id)
+		if err != nil {
+			utils.ResponseBadRequest(ctx, err)
+			return
+		}
+		location, _ := time.LoadLocation(DEFAULT_TIME_ZONE)
+		parsedDate, err := time.ParseInLocation("2006-01-02", result[0], location)
+
+		if err != nil {
+			utils.ResponseBadRequest(ctx, err)
+			return
+		}
+
+		item.RiverID = uint(parsedId)
+		item.Date = parsedDate
+		item.UserID = uint(userID)
+
+		if result[1] != "" {
+			item.Rainfall, _ = strconv.ParseFloat(result[1], 64)
+		} else {
+			item.Rainfall = 0
+		}
+
+		if result[2] != "" {
+			item.MinTemperature, _ = strconv.ParseFloat(result[2], 64)
+		} else {
+			item.MinTemperature = 0
+		}
+
+		if result[3] != "" {
+			item.MaxTemperature, _ = strconv.ParseFloat(result[3], 64)
+		} else {
+			item.MaxTemperature = 0
+		}
+
+		if result[4] != "" {
+			item.Humidity, _ = strconv.ParseFloat(result[4], 64)
+		} else {
+			item.Humidity = 0
+		}
+
+		if result[5] != "" {
+			item.WindSpeed, _ = strconv.ParseFloat(result[5], 64)
+		} else {
+			item.WindSpeed = 0
+		}
+
+		if result[6] != "" {
+			item.IlluminationDuration, _ = strconv.ParseFloat(result[6], 64)
+		} else {
+			item.IlluminationDuration = 0
+		}
+
+		if result[7] != "" {
+			item.Evaporation, _ = strconv.ParseFloat(result[7], 64)
+		} else {
+			item.Evaporation = 0
+		}
+
+		climate = append(climate, item)
+	}
+
+	err = repository.Create(&climate)
+
+	if err != nil {
+		utils.ResponseBadRequest(ctx, err)
+		return
+	}
+
+	utils.ResponseSuccess(ctx, climate)
 }

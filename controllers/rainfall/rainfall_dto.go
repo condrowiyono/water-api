@@ -6,9 +6,15 @@ import (
 
 type RainfallFilterDTO struct {
 	utils.Pagination
-	Name string `gorm:"name" form:"name"`
+	RiverID uint   `form:"river_id"`
+	Name    string `gorm:"name" form:"name"`
 }
 
 type ExportDTO struct {
 	Year string `form:"year"`
+}
+
+type ChartDataDTO struct {
+	Date    string `form:"date" binding:"required"`
+	RiverID uint   `form:"river_id" binding:"required"`
 }

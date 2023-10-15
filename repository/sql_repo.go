@@ -13,6 +13,7 @@ import (
 
 func Create(model interface{}) error {
 	err := database.DB.Create(model).Error
+
 	if err != nil {
 		logger.Errorf("error, not save data %v", err)
 		return err

@@ -32,9 +32,15 @@ func RegisterRoutes(route *gin.Engine) {
 	route.GET("/rivers", river.GetAllNoPagination)
 	route.GET("/rivers/:id", river.GetByID)
 	route.GET("/rivers-count", river.GetRiverCount)
+
 	route.GET("/rainfalls/today/:river", rainfall.GetToday)
 	route.GET("/waterlevels/today/:river", waterlevel.GetToday)
 	route.GET("/climates/today/:river", climate.GetToday)
+
+	route.GET("/data/rainfalls/intraday", rainfall.GetIntraday)
+	route.GET("/data/rainfalls/monthly", rainfall.GetMonthly)
+	route.GET("/data/rainfalls/yearly", rainfall.GetYearly)
+	route.GET("/data/rainfalls/max", rainfall.GetMax)
 
 	route.POST("/upload", upload.UploadImage)
 
@@ -45,53 +51,63 @@ func RegisterRoutes(route *gin.Engine) {
 		meRoute.GET("", auth.GetProfile)
 	}
 
-	adminRoute := route.Group("/admin")
+	adminReadRoute := route.Group("/admin")
 	{
-		adminRoute.Use(middleware.AuthMiddleware())
+		adminReadRoute.GET("/rivers", river.GetAll)
+		adminReadRoute.GET("/rivers/:id", river.GetByID)
 
-		adminRoute.GET("/permissions", permission.GetAll)
-		adminRoute.GET("/permissions/:id", permission.GetByID)
-		adminRoute.POST("/permissions", permission.Create)
-		adminRoute.PUT("/permissions/:id", permission.Update)
-		adminRoute.DELETE("/permissions/:id", permission.Delete)
+		adminReadRoute.GET("/rainfalls", rainfall.GetAll)
+		adminReadRoute.GET("/rainfalls/:id", rainfall.GetByID)
 
-		adminRoute.GET("/roles", role.GetAll)
-		adminRoute.GET("/roles/:id", role.GetByID)
-		adminRoute.POST("/roles/:id/add-permissions", role.AddPermissions)
-		adminRoute.POST("/roles", role.Create)
-		adminRoute.PUT("/roles/:id", role.Update)
-		adminRoute.DELETE("/roles/:id", role.Delete)
+		adminReadRoute.GET("/waterlevels", waterlevel.GetAll)
+		adminReadRoute.GET("/waterlevels/:id", waterlevel.GetByID)
 
-		adminRoute.GET("/users", user.GetAll)
-		adminRoute.GET("/users/:id", user.GetByID)
-		adminRoute.POST("/users/:id/attach-roles", user.AttachRole)
-		adminRoute.POST("/users", user.Create)
-		adminRoute.PUT("/users/:id", user.Update)
-		adminRoute.DELETE("/users/:id", user.Delete)
+		adminReadRoute.GET("/climates", climate.GetAll)
+		adminReadRoute.GET("/climates/:id", climate.GetByID)
+	}
 
-		adminRoute.GET("/rivers", river.GetAll)
-		adminRoute.GET("/rivers/:id", river.GetByID)
-		adminRoute.POST("/rivers", river.Create)
-		adminRoute.PUT("/rivers/:id", river.Update)
-		adminRoute.DELETE("/rivers/:id", river.Delete)
+	adminWriteRoute := route.Group("/admin")
+	{
+		adminWriteRoute.Use(middleware.AuthMiddleware())
 
-		adminRoute.GET("/waterlevels", waterlevel.GetAll)
-		adminRoute.GET("/waterlevels/:id", waterlevel.GetByID)
-		adminRoute.PUT("/waterlevels/:id", waterlevel.Update)
-		adminRoute.DELETE("/waterlevels/:id", waterlevel.Delete)
-		adminRoute.GET("/waterlevels/export/:river", waterlevel.ExportByID)
+		adminWriteRoute.GET("/permissions", permission.GetAll)
+		adminWriteRoute.GET("/permissions/:id", permission.GetByID)
+		adminWriteRoute.POST("/permissions", permission.Create)
+		adminWriteRoute.PUT("/permissions/:id", permission.Update)
+		adminWriteRoute.DELETE("/permissions/:id", permission.Delete)
 
-		adminRoute.GET("/rainfalls", rainfall.GetAll)
-		adminRoute.GET("/rainfalls/:id", rainfall.GetByID)
-		adminRoute.PUT("/rainfalls/:id", rainfall.Update)
-		adminRoute.DELETE("/rainfalls/:id", rainfall.Delete)
-		adminRoute.GET("/rainfalls/export/:river", rainfall.ExportByID)
+		adminWriteRoute.GET("/roles", role.GetAll)
+		adminWriteRoute.GET("/roles/:id", role.GetByID)
+		adminWriteRoute.POST("/roles/:id/add-permissions", role.AddPermissions)
+		adminWriteRoute.POST("/roles", role.Create)
+		adminWriteRoute.PUT("/roles/:id", role.Update)
+		adminWriteRoute.DELETE("/roles/:id", role.Delete)
 
-		adminRoute.GET("/climates", climate.GetAll)
-		adminRoute.GET("/climates/:id", climate.GetByID)
-		adminRoute.PUT("/climates/:id", climate.Update)
-		adminRoute.DELETE("/climates/:id", climate.Delete)
-		adminRoute.GET("/climates/export/:river", climate.ExportByID)
+		adminWriteRoute.GET("/users", user.GetAll)
+		adminWriteRoute.GET("/users/:id", user.GetByID)
+		adminWriteRoute.POST("/users/:id/attach-roles", user.AttachRole)
+		adminWriteRoute.POST("/users", user.Create)
+		adminWriteRoute.PUT("/users/:id", user.Update)
+		adminWriteRoute.DELETE("/users/:id", user.Delete)
+
+		adminWriteRoute.POST("/rivers", river.Create)
+		adminWriteRoute.PUT("/rivers/:id", river.Update)
+		adminWriteRoute.DELETE("/rivers/:id", river.Delete)
+
+		adminWriteRoute.PUT("/waterlevels/:id", waterlevel.Update)
+		adminWriteRoute.DELETE("/waterlevels/:id", waterlevel.Delete)
+		adminWriteRoute.GET("/waterlevels/:id/export", waterlevel.ExportByID)
+		adminWriteRoute.POST("/waterlevels/:id/import", waterlevel.Import)
+
+		adminWriteRoute.PUT("/rainfalls/:id", rainfall.Update)
+		adminWriteRoute.DELETE("/rainfalls/:id", rainfall.Delete)
+		adminWriteRoute.GET("/rainfalls/:id/export", rainfall.ExportByID)
+		adminWriteRoute.POST("/rainfalls/:id/import", rainfall.Import)
+
+		adminWriteRoute.PUT("/climates/:id", climate.Update)
+		adminWriteRoute.DELETE("/climates/:id", climate.Delete)
+		adminWriteRoute.GET("/climates/:id/export", climate.ExportByID)
+		adminWriteRoute.POST("/climates/:id/import", climate.Import)
 	}
 
 	mobileRoute := route.Group("/mobile")

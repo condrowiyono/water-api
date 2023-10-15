@@ -26,7 +26,8 @@ func DbConnection(masterDSN string) error {
 	}
 
 	db, err = gorm.Open(mysql.Open(masterDSN), &gorm.Config{
-		Logger: logger.Default.LogMode(loglevel),
+		Logger:          logger.Default.LogMode(loglevel),
+		CreateBatchSize: 10000,
 	})
 
 	if err != nil {

@@ -7,6 +7,8 @@ import (
 	"mini-bank/repository"
 	"mini-bank/utils"
 	"mini-bank/utils/excel"
+	"reflect"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -125,7 +127,7 @@ func GetToday(ctx *gin.Context) {
 func ExportByID(ctx *gin.Context) {
 	var waterlevel []models.WaterLevelObservation
 	var filter WaterLevelExportDTO
-	riverID := ctx.Param("river")
+	riverID := ctx.Param("id")
 	ctx.BindQuery(&filter)
 
 	if filter.Year == "" {
@@ -183,4 +185,83 @@ func ExportByID(ctx *gin.Context) {
 	ctx.Header("Content-Transfer-Encoding", "binary")
 
 	file.Write(ctx.Writer)
+}
+
+func Import(ctx *gin.Context) {
+	var waterlevels []models.WaterLevelObservation
+	id := ctx.Param("id")
+	var userID = ctx.MustGet("Id").(float64)
+
+	file, err := ctx.FormFile("file")
+	if err != nil {
+		utils.ResponseBadRequest(ctx, err)
+		return
+	}
+
+	f, err := file.Open()
+	if err != nil {
+		utils.ResponseBadRequest(ctx, err)
+		return
+	}
+
+	defer f.Close()
+
+	results, headers, err := excel.ReadXLSX(f)
+	if err != nil {
+		utils.ResponseBadRequest(ctx, err)
+		return
+	}
+
+	expectedHeader := []string{
+		"Date",
+		"Data",
+	}
+
+	if !reflect.DeepEqual(headers, expectedHeader) {
+		utils.ResponseBadRequest(ctx, errors.New("invalid header"))
+		return
+	}
+
+	for _, result := range results {
+		var item models.WaterLevelObservation
+		parsedId, err := strconv.Atoi(id)
+		if err != nil {
+			utils.ResponseBadRequest(ctx, err)
+			return
+		}
+		location, _ := time.LoadLocation(DEFAULT_TIME_ZONE)
+		parsedDate, err := time.ParseInLocation("2006-01-02 15:04:05", result[0], location)
+
+		if err != nil {
+			utils.ResponseBadRequest(ctx, err)
+			return
+		}
+
+		if (len(result) < 2) || (result[1] == "") {
+			continue
+		}
+
+		data := result[1]
+		parserData, err := strconv.ParseFloat(data, 64)
+		if err != nil {
+			utils.ResponseBadRequest(ctx, err)
+			return
+		}
+
+		item.RiverID = uint(parsedId)
+		item.Date = parsedDate
+		item.Data = parserData
+		item.UserID = uint(userID)
+
+		waterlevels = append(waterlevels, item)
+	}
+
+	err = repository.Create(&waterlevels)
+
+	if err != nil {
+		utils.ResponseBadRequest(ctx, err)
+		return
+	}
+
+	utils.ResponseSuccess(ctx, waterlevels)
 }

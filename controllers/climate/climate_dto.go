@@ -6,7 +6,8 @@ import (
 
 type ClimateFilterDTO struct {
 	utils.Pagination
-	Name string `gorm:"name" form:"name"`
+	Name    string `gorm:"name" form:"name"`
+	RiverID uint   `form:"river_id"`
 }
 
 type ExportDTO struct {
