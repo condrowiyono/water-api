@@ -18,3 +18,7 @@ type ChartDataDTO struct {
 	Date    string `form:"date" binding:"required"`
 	RiverID uint   `form:"river_id" binding:"required"`
 }
+
+type FilterAllByDateDTO struct {
+	Date string `form:"date" binding:"required"`
+}

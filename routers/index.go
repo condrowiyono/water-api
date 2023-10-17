@@ -37,10 +37,18 @@ func RegisterRoutes(route *gin.Engine) {
 	route.GET("/waterlevels/today/:river", waterlevel.GetToday)
 	route.GET("/climates/today/:river", climate.GetToday)
 
+	route.GET("/data/rainfalls/today", rainfall.GetAllToday)
+	route.GET("/data/rainfalls/by-date", rainfall.GetAllByDate)
 	route.GET("/data/rainfalls/intraday", rainfall.GetIntraday)
 	route.GET("/data/rainfalls/monthly", rainfall.GetMonthly)
 	route.GET("/data/rainfalls/yearly", rainfall.GetYearly)
 	route.GET("/data/rainfalls/max", rainfall.GetMax)
+
+	route.GET("/data/waterlevels/today", waterlevel.GetAllToday)
+	route.GET("/data/waterlevels/by-date", waterlevel.GetAllByDate)
+
+	route.GET("/data/climates/today", climate.GetAllToday)
+	route.GET("/data/climates/by-date", climate.GetAllByDate)
 
 	route.POST("/upload", upload.UploadImage)
 

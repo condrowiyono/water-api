@@ -13,3 +13,7 @@ type ClimateFilterDTO struct {
 type ExportDTO struct {
 	Year string `form:"year"`
 }
+
+type FilterAllByDateDTO struct {
+	Date string `form:"date" binding:"required"`
+}

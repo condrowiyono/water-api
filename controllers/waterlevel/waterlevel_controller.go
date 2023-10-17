@@ -124,6 +124,44 @@ func GetToday(ctx *gin.Context) {
 	utils.ResponseSuccess(ctx, waterlevel)
 }
 
+func GetAllToday(ctx *gin.Context) {
+	now := time.Now()
+	results, err := repository.GetAllWaterLevelByDate(now)
+
+	if err != nil {
+		utils.ResponseSuccess(ctx, nil)
+		return
+	}
+
+	utils.ResponseSuccess(ctx, results)
+}
+
+func GetAllByDate(ctx *gin.Context) {
+	var filter FilterAllByDateDTO
+
+	err := ctx.BindQuery(&filter)
+	if err != nil {
+		utils.ResponseBadRequest(ctx, err)
+		return
+	}
+
+	date, err := time.Parse("2006-01-02", filter.Date)
+
+	if err != nil {
+		utils.ResponseBadRequest(ctx, err)
+		return
+	}
+
+	results, err := repository.GetAllWaterLevelByDate(date)
+
+	if err != nil {
+		utils.ResponseSuccess(ctx, nil)
+		return
+	}
+
+	utils.ResponseSuccess(ctx, results)
+}
+
 func ExportByID(ctx *gin.Context) {
 	var waterlevel []models.WaterLevelObservation
 	var filter WaterLevelExportDTO
